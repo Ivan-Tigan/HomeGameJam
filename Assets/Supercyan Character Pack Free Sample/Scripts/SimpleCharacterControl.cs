@@ -6,11 +6,12 @@ public class SimpleCharacterControl : MonoBehaviour {
 
     public int playerID = 1;
 
-
-    private enum ControlMode
+    public enum ControlMode
     {
         Tank,
-        Direct
+        Direct,
+        WalkIn,
+        Stop
     }
 
     public float movementScaleNormal = 1f;
@@ -26,10 +27,10 @@ public class SimpleCharacterControl : MonoBehaviour {
     [SerializeField] private float m_moveSpeed = 2;
     [SerializeField] private float m_turnSpeed = 200;
     [SerializeField] private float m_jumpForce = 4;
-    [SerializeField] private Animator m_animator;
+    [SerializeField] public Animator m_animator;
     [SerializeField] private Rigidbody m_rigidBody;
 
-    [SerializeField] private ControlMode m_controlMode = ControlMode.Direct;
+    [SerializeField] public ControlMode m_controlMode = ControlMode.WalkIn;
 
     private float m_currentV = 0;
     private float m_currentH = 0;
@@ -101,6 +102,13 @@ public class SimpleCharacterControl : MonoBehaviour {
         if (m_collisions.Count == 0) { m_isGrounded = false; }
     }
 
+    public void Start()
+    {
+        m_controlMode = ControlMode.WalkIn;
+        GetComponent<Rigidbody>().useGravity = false;
+        GetComponent<Collider>().enabled = false;
+    }
+
     public IEnumerator getStunned(float duration)
     {
         isStunned = true;
@@ -117,6 +125,13 @@ public class SimpleCharacterControl : MonoBehaviour {
                 DirectUpdate();
                 break;
 
+            case ControlMode.WalkIn:
+                walkIn();
+                break;
+
+            case ControlMode.Stop:
+                stop();
+                break;
             case ControlMode.Tank:
                 TankUpdate();
                 break;
@@ -127,6 +142,67 @@ public class SimpleCharacterControl : MonoBehaviour {
         }
 
         m_wasGrounded = m_isGrounded;
+    }
+    private void stop()
+    {
+        float v = 0;
+        float h = 0;
+
+        Transform camera = Camera.main.transform;
+
+
+
+        m_currentV = Mathf.Lerp(m_currentV, v, Time.deltaTime * m_interpolation);
+        m_currentH = Mathf.Lerp(m_currentH, h, Time.deltaTime * m_interpolation);
+
+        Vector3 direction = camera.forward * m_currentV + camera.right * m_currentH;
+
+        float directionLength = direction.magnitude;
+        direction.y = 0;
+        direction = direction.normalized * directionLength;
+
+        if (direction != Vector3.zero)
+        {
+            m_currentDirection = Vector3.Slerp(m_currentDirection, direction, Time.deltaTime * m_interpolation);
+
+            transform.rotation = Quaternion.LookRotation(m_currentDirection);
+            transform.position += m_currentDirection * m_moveSpeed * Time.deltaTime;
+
+            m_animator.SetFloat("MoveSpeed", direction.magnitude);
+        }
+
+        m_animator.SetBool("Grounded", true);
+    }
+    private void walkIn()
+    {
+        float v = 1;
+        float h = 0;
+
+        Transform camera = Camera.main.transform;
+
+      
+
+        m_currentV = Mathf.Lerp(m_currentV, v, Time.deltaTime * m_interpolation);
+        m_currentH = Mathf.Lerp(m_currentH, h, Time.deltaTime * m_interpolation);
+
+        Vector3 direction = camera.forward * m_currentV + camera.right * m_currentH;
+
+        float directionLength = direction.magnitude;
+        direction.y = 0;
+        direction = direction.normalized * directionLength;
+
+        if (direction != Vector3.zero)
+        {
+            m_currentDirection = Vector3.Slerp(m_currentDirection, direction, Time.deltaTime * m_interpolation);
+
+            transform.rotation = Quaternion.LookRotation(m_currentDirection);
+            transform.position += m_currentDirection * m_moveSpeed * Time.deltaTime;
+
+            m_animator.SetFloat("MoveSpeed", direction.magnitude);
+        }
+
+        m_animator.SetBool("Grounded", true);
+
     }
 
     private void TankUpdate()
@@ -159,11 +235,11 @@ public class SimpleCharacterControl : MonoBehaviour {
     {
         float v = Input.GetAxis("Vertical" + playerID);
         float h = Input.GetAxis("Horizontal" + playerID);
-        Debug.Log("H: " + h + ", V: " + v);
+
         Transform camera = Camera.main.transform;
 
         v *= movementScale();
-
+        h *= movementScale();
         if (Input.GetKey(KeyCode.LeftShift))
         {
             v *= m_walkScale;

@@ -5,6 +5,8 @@ using UnityEngine;
 public class Pickup : MonoBehaviour {
 
     public string name;
+    public Sprite image;
+    public AudioClip soundWhenAcquired;
     public float weight;
     public float stunDuration = 0.5f;
     public float hitForceMultiplier;
@@ -32,8 +34,10 @@ public class Pickup : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision)
     {
+
         if(collision.gameObject.tag == "Player")
         {
+            
             if (hasBeenThrown)
             {
                 collision.gameObject.GetComponent<PlayerActions>().getHit(this);

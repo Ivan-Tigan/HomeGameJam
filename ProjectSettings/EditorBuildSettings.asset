@@ -6,6 +6,21 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Start.unity
+    guid: 383d1cc814e7d98419504cf1506b1123
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 0
+    path: Assets/HomeGameJam.unity
+    guid: 534cacbd22d305444b67ae6833da0310
+  - enabled: 1
+    path: Assets/ChooseNumberOfPlayers.unity
+    guid: adc090fef8b5ee14daedeeb6102289ea
+  - enabled: 1
+    path: Assets/Attic.unity
+    guid: 917b9e179b84ae6499a83de923485413
+  - enabled: 1
+    path: Assets/Win.unity
+    guid: a353286ba7e58864799bcd71b4c6f373
   m_configObjects: {}
